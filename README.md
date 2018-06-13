@@ -11,31 +11,25 @@ Package pulseaudio provides functions for interacting with the PulseAudio server
 
 Sample usage:
 
+```
 package main
 
 import (
+	"fmt"
 
-```
-"fmt"
-
-"mrogalski.eu/go/pulseaudio"
-```
-
+	"mrogalski.eu/go/pulseaudio"
 )
 
 func main() {
-
-```
-c, err := pulseaudio.NewClient("golang")
-if err != nil {
-	fmt.Println("Error when creating PulseAudio client:", err)
-	return
+	c, err := pulseaudio.NewClient("golang")
+	if err != nil {
+		fmt.Println("Error when creating PulseAudio client:", err)
+		return
+	}
+	fmt.Println(c.Sinks()[0].GetVolume())
+	c.Close()
 }
-fmt.Println(c.Sinks()[0].GetVolume())
-c.Close()
 ```
-
-}
 
 
 

@@ -2,23 +2,23 @@
 //
 // Sample usage:
 //
-// package main
+// 	package main
 //
-// import (
-// 	"fmt"
+// 	import (
+// 		"fmt"
 //
-// 	"mrogalski.eu/go/pulseaudio"
-// )
+// 		"mrogalski.eu/go/pulseaudio"
+// 	)
 //
-// func main() {
-// 	c, err := pulseaudio.NewClient("golang")
-// 	if err != nil {
-// 		fmt.Println("Error when creating PulseAudio client:", err)
-// 		return
+// 	func main() {
+// 		c, err := pulseaudio.NewClient("golang")
+// 		if err != nil {
+// 			fmt.Println("Error when creating PulseAudio client:", err)
+// 			return
+// 		}
+// 		fmt.Println(c.Sinks()[0].GetVolume())
+// 		c.Close()
 // 	}
-// 	fmt.Println(c.Sinks()[0].GetVolume())
-// 	c.Close()
-// }
 package pulseaudio // import "mrogalski.eu/go/pulseaudio"
 
 // #cgo pkg-config: libpulse
