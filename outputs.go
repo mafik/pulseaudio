@@ -20,6 +20,16 @@ func (o Output) Activate() error {
 		return err
 	}
 
+	if o.CardID == "all" && o.PortID == "none" {
+		for _, otherCard := range cards {
+			err = c.setCardProfile(otherCard.Index, "off")
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
 	var found bool
 	var card card
 	for _, card = range cards {
@@ -84,6 +94,8 @@ func (o Output) Activate() error {
 }
 
 // Outputs returns a list of all audio outputs and an index of the active audio output.
+//
+// The last audio output is always called "None" and indicates that audio is disabled.
 func (c *Client) Outputs() (outputs []Output, activeIndex int, err error) {
 	s, err := c.serverInfo()
 	if err != nil {
@@ -126,5 +138,16 @@ func (c *Client) Outputs() (outputs []Output, activeIndex int, err error) {
 			})
 		}
 	}
+	if activeIndex == -1 {
+		activeIndex = len(outputs)
+	}
+	outputs = append(outputs, Output{
+		client:    c,
+		CardID:    "all",
+		CardName:  "All",
+		PortID:    "none",
+		PortName:  "None",
+		Available: false,
+	})
 	return
 }
