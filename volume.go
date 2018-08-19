@@ -1,4 +1,4 @@
-package pulseaudio // import "mrogalski.eu/go/pulseaudio"
+package pulseaudio
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ const pulseVolumeMax = 0xffff
 
 // Volume returns current audio volume as a number from 0 to 1 (or more than 1 - if volume is boosted).
 func (c *Client) Volume() (float32, error) {
-	s, err := c.serverInfo()
+	s, err := c.ServerInfo()
 	if err != nil {
 		return 0, err
 	}
@@ -24,11 +24,15 @@ func (c *Client) Volume() (float32, error) {
 
 // SetVolume changes the current volume to a specified value from 0 to 1 (or more than 1 - if volume should be boosted).
 func (c *Client) SetVolume(volume float32) error {
-	s, err := c.serverInfo()
+	s, err := c.ServerInfo()
 	if err != nil {
 		return err
 	}
 	return c.setSinkVolume(s.DefaultSink, cvolume{uint32(volume * 0xffff)})
+}
+
+func (c *Client) SetSinkVolume(sinkName string, volume float32) error {
+	return c.setSinkVolume(sinkName, cvolume{uint32(volume * 0xffff)})
 }
 
 func (c *Client) setSinkVolume(sinkName string, cvolume cvolume) error {

@@ -2,7 +2,7 @@ package pulseaudio
 
 import "io"
 
-type server struct {
+type Server struct {
 	PackageName    string
 	PackageVersion string
 	User           string
@@ -14,7 +14,7 @@ type server struct {
 	ChannelMap     channelMap
 }
 
-func (s *server) ReadFrom(r io.Reader) (int64, error) {
+func (s *Server) ReadFrom(r io.Reader) (int64, error) {
 	return 0, bread(r,
 		stringTag, &s.PackageName,
 		stringTag, &s.PackageVersion,
@@ -300,12 +300,12 @@ func (c *Client) setDefaultSink(sinkName string) error {
 	return err
 }
 
-func (c *Client) serverInfo() (*server, error) {
+func (c *Client) ServerInfo() (*Server, error) {
 	r, err := c.request(commandGetServerInfo)
 	if err != nil {
 		return nil, err
 	}
-	var s server
+	var s Server
 	err = bread(r, &s)
 	if err != nil {
 		return nil, err

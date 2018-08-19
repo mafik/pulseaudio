@@ -1,4 +1,4 @@
-package pulseaudio // import "mrogalski.eu/go/pulseaudio"
+package pulseaudio
 
 import "fmt"
 
@@ -77,7 +77,7 @@ func (o Output) Activate() error {
 	if err != nil {
 		return err
 	}
-	s, err := c.serverInfo()
+	s, err := c.ServerInfo()
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (o Output) Activate() error {
 //
 // The last audio output is always called "None" and indicates that audio is disabled.
 func (c *Client) Outputs() (outputs []Output, activeIndex int, err error) {
-	s, err := c.serverInfo()
+	s, err := c.ServerInfo()
 	if err != nil {
 		return nil, 0, err
 	}

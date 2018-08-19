@@ -19,7 +19,7 @@
 // Changing the default audio output.
 //
 // Notifications on config updates.
-package pulseaudio // import "mrogalski.eu/go/pulseaudio"
+package pulseaudio
 
 import (
 	"bytes"

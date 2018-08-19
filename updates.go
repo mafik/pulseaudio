@@ -1,4 +1,4 @@
-package pulseaudio // import "mrogalski.eu/go/pulseaudio"
+package pulseaudio
 
 // Updates returns a channel with PulseAudio updates.
 func (c *Client) Updates() (updates <-chan struct{}, err error) {

@@ -1,4 +1,4 @@
-package pulseaudio // import "mrogalski.eu/go/pulseaudio"
+package pulseaudio
 
 type command uint32
 
