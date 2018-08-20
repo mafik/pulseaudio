@@ -45,6 +45,15 @@ type packet struct {
 	responseChan chan<- packetResponse
 }
 
+type Error struct {
+	Cmd  string
+	Code uint32
+}
+
+func (err *Error) Error() string {
+	return fmt.Sprintf("PulseAudio error: %s -> %s", err.Cmd, errors[err.Code])
+}
+
 // Client maintains a connection to the PulseAudio server.
 type Client struct {
 	conn        net.Conn
@@ -184,7 +193,7 @@ loop:
 				cmd := command(binary.BigEndian.Uint32(p.requestBytes[21:]))
 				p.responseChan <- packetResponse{
 					buff: nil,
-					err:  fmt.Errorf("PulseAudio error: %s -> %s", cmd, errors[code]),
+					err:  &Error{Cmd: cmd.String(), Code: code},
 				}
 				continue
 			}
