@@ -235,13 +235,27 @@ func (c *Client) request(cmd command, args ...interface{}) (*bytes.Buffer, error
 		return nil, fmt.Errorf("Request size %d is too long (only %d allowed)", b.Len(), frameSizeMaxAllow)
 	}
 	responseChan := make(chan packetResponse)
-	c.packets <- packet{
+
+	err = c.addPacket(packet{
 		requestBytes: b.Bytes(),
 		responseChan: responseChan,
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	response := <-responseChan
 	return response.buff, response.err
+}
+
+func (c *Client) addPacket(data packet) (err error) {
+	defer func() {
+		if recover() != nil {
+			err = fmt.Errorf("connection closed")
+		}
+	}()
+	c.packets <- data
+	return nil
 }
 
 func (c *Client) auth() error {
