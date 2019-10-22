@@ -1,6 +1,8 @@
 package pulseaudio
 
-import "io"
+import (
+	"io"
+)
 
 type Server struct {
 	PackageName    string
@@ -85,9 +87,20 @@ func (s *sink) ReadFrom(r io.Reader) (int64, error) {
 			return 0, err
 		}
 	}
+	if portCount == 0 {
+		err = bread(r, stringNullTag)
+		if err != nil {
+			return 0, err
+		}
+	} else {
+		err = bread(r, stringTag, &s.ActivePortName)
+		if err != nil {
+			return 0, err
+		}
+	}
+
 	var formatCount uint8
 	err = bread(r,
-		stringTag, &s.ActivePortName,
 		uint8Tag, &formatCount)
 	if err != nil {
 		return 0, err
