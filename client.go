@@ -19,7 +19,7 @@
 // Changing the default audio output.
 //
 // Notifications on config updates.
-package pulseaudio // import "mrogalski.eu/go/pulseaudio"
+package pulseaudio
 
 import (
 	"bytes"
@@ -43,6 +43,15 @@ type packetResponse struct {
 type packet struct {
 	requestBytes []byte
 	responseChan chan<- packetResponse
+}
+
+type Error struct {
+	Cmd  string
+	Code uint32
+}
+
+func (err *Error) Error() string {
+	return fmt.Sprintf("PulseAudio error: %s -> %s", err.Cmd, errors[err.Code])
 }
 
 // Client maintains a connection to the PulseAudio server.
@@ -184,7 +193,7 @@ loop:
 				cmd := command(binary.BigEndian.Uint32(p.requestBytes[21:]))
 				p.responseChan <- packetResponse{
 					buff: nil,
-					err:  fmt.Errorf("PulseAudio error: %s -> %s", cmd, errors[code]),
+					err:  &Error{Cmd: cmd.String(), Code: code},
 				}
 				continue
 			}
@@ -226,13 +235,27 @@ func (c *Client) request(cmd command, args ...interface{}) (*bytes.Buffer, error
 		return nil, fmt.Errorf("Request size %d is too long (only %d allowed)", b.Len(), frameSizeMaxAllow)
 	}
 	responseChan := make(chan packetResponse)
-	c.packets <- packet{
+
+	err = c.addPacket(packet{
 		requestBytes: b.Bytes(),
 		responseChan: responseChan,
+	})
+	if err != nil {
+		return nil, err
 	}
 
 	response := <-responseChan
 	return response.buff, response.err
+}
+
+func (c *Client) addPacket(data packet) (err error) {
+	defer func() {
+		if recover() != nil {
+			err = fmt.Errorf("connection closed")
+		}
+	}()
+	c.packets <- data
+	return nil
 }
 
 func (c *Client) auth() error {

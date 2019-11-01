@@ -1,8 +1,10 @@
 package pulseaudio
 
-import "io"
+import (
+	"io"
+)
 
-type server struct {
+type Server struct {
 	PackageName    string
 	PackageVersion string
 	User           string
@@ -14,7 +16,7 @@ type server struct {
 	ChannelMap     channelMap
 }
 
-func (s *server) ReadFrom(r io.Reader) (int64, error) {
+func (s *Server) ReadFrom(r io.Reader) (int64, error) {
 	return 0, bread(r,
 		stringTag, &s.PackageName,
 		stringTag, &s.PackageVersion,
@@ -85,9 +87,20 @@ func (s *sink) ReadFrom(r io.Reader) (int64, error) {
 			return 0, err
 		}
 	}
+	if portCount == 0 {
+		err = bread(r, stringNullTag)
+		if err != nil {
+			return 0, err
+		}
+	} else {
+		err = bread(r, stringTag, &s.ActivePortName)
+		if err != nil {
+			return 0, err
+		}
+	}
+
 	var formatCount uint8
 	err = bread(r,
-		stringTag, &s.ActivePortName,
 		uint8Tag, &formatCount)
 	if err != nil {
 		return 0, err
@@ -160,7 +173,7 @@ func (s *sampleSpec) ReadFrom(r io.Reader) (int64, error) {
 	return 0, bread(r, sampleSpecTag, &s.Format, &s.Channels, &s.Rate)
 }
 
-type card struct {
+type Card struct {
 	Index         uint32
 	Name          string
 	Module        uint32
@@ -179,7 +192,7 @@ type profile struct {
 }
 
 type port struct {
-	Card              *card
+	Card              *Card
 	Name, Description string
 	Pririty           uint32
 	Available         uint32
@@ -233,14 +246,14 @@ func (c *Client) sinks() ([]sink, error) {
 	return sinks, nil
 }
 
-func (c *Client) cards() ([]card, error) {
+func (c *Client) Cards() ([]Card, error) {
 	b, err := c.request(commandGetCardInfoList)
 	if err != nil {
 		return nil, err
 	}
-	var cards []card
+	var cards []Card
 	for b.Len() > 0 {
-		var card card
+		var card Card
 		var profileCount uint32
 		err := bread(b,
 			uint32Tag, &card.Index,
@@ -286,7 +299,7 @@ func (c *Client) cards() ([]card, error) {
 	return cards, nil
 }
 
-func (c *Client) setCardProfile(cardIndex uint32, profileName string) error {
+func (c *Client) SetCardProfile(cardIndex uint32, profileName string) error {
 	_, err := c.request(commandSetCardProfile,
 		uint32Tag, cardIndex,
 		stringNullTag,
@@ -300,12 +313,12 @@ func (c *Client) setDefaultSink(sinkName string) error {
 	return err
 }
 
-func (c *Client) serverInfo() (*server, error) {
+func (c *Client) ServerInfo() (*Server, error) {
 	r, err := c.request(commandGetServerInfo)
 	if err != nil {
 		return nil, err
 	}
-	var s server
+	var s Server
 	err = bread(r, &s)
 	if err != nil {
 		return nil, err

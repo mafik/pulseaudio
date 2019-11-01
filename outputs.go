@@ -1,4 +1,4 @@
-package pulseaudio // import "mrogalski.eu/go/pulseaudio"
+package pulseaudio
 
 import "fmt"
 
@@ -15,14 +15,14 @@ type Output struct {
 // Activate sets this output as the main one.
 func (o Output) Activate() error {
 	c := o.client
-	cards, err := c.cards()
+	cards, err := c.Cards()
 	if err != nil {
 		return err
 	}
 
 	if o.CardID == "all" && o.PortID == "none" {
 		for _, otherCard := range cards {
-			err = c.setCardProfile(otherCard.Index, "off")
+			err = c.SetCardProfile(otherCard.Index, "off")
 			if err != nil {
 				return err
 			}
@@ -31,7 +31,7 @@ func (o Output) Activate() error {
 	}
 
 	var found bool
-	var card card
+	var card Card
 	for _, card = range cards {
 		if card.Name == o.CardID {
 			found = true
@@ -58,7 +58,7 @@ func (o Output) Activate() error {
 		if otherCard.Index == card.Index {
 			continue
 		}
-		err = c.setCardProfile(otherCard.Index, "off")
+		err = c.SetCardProfile(otherCard.Index, "off")
 		if err != nil {
 			return err
 		}
@@ -69,7 +69,7 @@ func (o Output) Activate() error {
 			bestProfile = profile
 		}
 	}
-	err = c.setCardProfile(card.Index, bestProfile.Name)
+	err = c.SetCardProfile(card.Index, bestProfile.Name)
 	if err != nil {
 		return err
 	}
@@ -77,7 +77,7 @@ func (o Output) Activate() error {
 	if err != nil {
 		return err
 	}
-	s, err := c.serverInfo()
+	s, err := c.ServerInfo()
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (o Output) Activate() error {
 //
 // The last audio output is always called "None" and indicates that audio is disabled.
 func (c *Client) Outputs() (outputs []Output, activeIndex int, err error) {
-	s, err := c.serverInfo()
+	s, err := c.ServerInfo()
 	if err != nil {
 		return nil, 0, err
 	}
@@ -105,7 +105,7 @@ func (c *Client) Outputs() (outputs []Output, activeIndex int, err error) {
 	if err != nil {
 		return nil, 0, err
 	}
-	cards, err := c.cards()
+	cards, err := c.Cards()
 	if err != nil {
 		return nil, 0, err
 	}
