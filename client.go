@@ -35,6 +35,8 @@ import (
 
 const version = 32
 
+var defaultAddr = fmt.Sprintf("/run/user/%d/pulse/native", os.Getuid())
+
 type packetResponse struct {
 	buff *bytes.Buffer
 	err  error
@@ -63,10 +65,12 @@ type Client struct {
 }
 
 // NewClient establishes a connection to the PulseAudio server.
-func NewClient() (*Client, error) {
-	addr := fmt.Sprintf("/run/user/%d/pulse/native", os.Getuid())
+func NewClient(addressArr ...string) (*Client, error) {
+	if len(addressArr) < 1 {
+		addressArr = []string{defaultAddr}
+	}
 
-	conn, err := net.Dial("unix", addr)
+	conn, err := net.Dial("unix", addressArr[0])
 	if err != nil {
 		return nil, err
 	}
