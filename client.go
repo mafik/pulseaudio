@@ -145,7 +145,7 @@ loop:
 			if len(p.requestBytes) < 26 {
 				p.responseChan <- packetResponse{
 					buff: nil,
-					err:  fmt.Errorf("Request too short. Needs at least 26 bytes"),
+					err:  fmt.Errorf("request too short. Needs at least 26 bytes"),
 				}
 				continue
 			}
@@ -155,7 +155,7 @@ loop:
 			if err != nil {
 				p.responseChan <- packetResponse{
 					buff: nil,
-					err:  fmt.Errorf("Couldn't send request: %s", err),
+					err:  fmt.Errorf("couldn't send request: %s", err),
 				}
 			} else {
 				pending[tag] = p
@@ -206,7 +206,7 @@ loop:
 			}
 			p.responseChan <- packetResponse{
 				buff: nil,
-				err:  fmt.Errorf("Expected Reply or Error but got: %s", rsp),
+				err:  fmt.Errorf("expected Reply or Error but got: %s", rsp),
 			}
 		}
 	}
@@ -267,7 +267,7 @@ func (c *Client) auth() error {
 	}
 	const cookieLength = 256
 	if len(cookie) != cookieLength {
-		return fmt.Errorf("Pulse audio client cookie has incorrect length %d: Expected %d (path %#v)",
+		return fmt.Errorf("pulse audio client cookie has incorrect length %d: Expected %d (path %#v)",
 			len(cookie), cookieLength, cookiePath)
 	}
 	b, err := c.request(commandAuth,
@@ -283,7 +283,7 @@ func (c *Client) auth() error {
 	}
 	serverVersion &= protocolVersionMask
 	if serverVersion < version {
-		return fmt.Errorf("PulseAudio server supports version %d but minimum required is %d", serverVersion, version)
+		return fmt.Errorf("pulseAudio server supports version %d but minimum required is %d", serverVersion, version)
 	}
 	return nil
 }

@@ -54,7 +54,7 @@ func TestExampleClient_SetVolume(t *testing.T) {
 	}
 
 	vol, err := c.Volume()
-	if err != nil{
+	if err != nil {
 		t.Errorf("%v", err)
 	}
 	if vol < 1.4999 {
@@ -96,4 +96,56 @@ func TestExampleClient_Updates(t *testing.T) {
 	// No update in 10 ms
 	// Volume set to 0.1
 	// Got update from PulseAudio
+}
+
+func TestExampleClient_SetMute(t *testing.T) {
+	c := clientForTest()
+	defer c.Close()
+
+	err := c.SetMute(true)
+	if err != nil {
+		t.Errorf("Can't mute : %v", err)
+	}
+	b, err := c.Mute()
+	if err != nil || !b {
+		t.Errorf("Can't mute : %v", err)
+	}
+
+	err = c.SetMute(false)
+	if err != nil {
+		t.Errorf("Can't unmute : %v", err)
+	}
+	b, err = c.Mute()
+	if err != nil || b {
+		t.Errorf("Wrong value : %v", err)
+	}
+
+}
+
+func TestExampleClient_ToggleMute(t *testing.T) {
+	c := clientForTest()
+	defer c.Close()
+
+	err := c.SetMute(true)
+	if err != nil {
+		t.Errorf("Can't mute : %v", err)
+	}
+
+	err = c.ToggleMute()
+	if err != nil {
+		t.Errorf("Can't toggle mute : %v", err)
+	}
+	b, err := c.Mute()
+	if err != nil || b {
+		t.Errorf("Wrong value : %v", err)
+	}
+
+	err = c.ToggleMute()
+	if err != nil {
+		t.Errorf("Can't toggle mute : %v", err)
+	}
+	b, err = c.Mute()
+	if err != nil || !b {
+		t.Errorf("Wrong value : %v", err)
+	}
 }
