@@ -2,6 +2,7 @@ package pulseaudio
 
 import (
 	"fmt"
+	"testing"
 	"time"
 )
 
@@ -43,7 +44,7 @@ func Example() {
 	// Use `client` to interact with PulseAudio
 }
 
-func ExampleClient_SetVolume() {
+func TestExampleClient_SetVolume(t *testing.T) {
 	c := clientForTest()
 	defer c.Close()
 
@@ -53,15 +54,15 @@ func ExampleClient_SetVolume() {
 	}
 
 	vol, err := c.Volume()
-	if err != nil {
-		panic(err)
+	if err != nil{
+		t.Errorf("%v", err)
 	}
-
-	fmt.Printf("Current volume is: %.2f", vol)
-	// Output: Current volume is: 1.50
+	if vol < 1.4999 {
+		t.Errorf("Wrong volume value : %v", vol)
+	}
 }
 
-func ExampleClient_Updates() {
+func TestExampleClient_Updates(t *testing.T) {
 	c := clientForTest()
 	defer c.Close()
 
@@ -72,7 +73,8 @@ func ExampleClient_Updates() {
 
 	select {
 	case _ = <-updates:
-		fmt.Println("Got update from PulseAudio")
+		//fmt.Println("Got update from PulseAudio")
+		t.Errorf("Got update from PulseAudio")
 	case _ = <-time.After(time.Millisecond * 10):
 		fmt.Println("No update in 10 ms")
 	}
@@ -87,7 +89,7 @@ func ExampleClient_Updates() {
 	case _ = <-updates:
 		fmt.Println("Got update from PulseAudio")
 	case _ = <-time.After(time.Millisecond * 10):
-		fmt.Println("No update in 10 ms")
+		t.Errorf("No update in 10 ms")
 	}
 
 	// Output:
