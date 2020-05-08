@@ -41,19 +41,19 @@ func (c *Client) setSinkVolume(sinkName string, cvolume cvolume) error {
 }
 
 // ToggleMute reverse mute status
-func (c *Client) ToggleMute() error {
+func (c *Client) ToggleMute() (bool, error) {
 	s, err := c.ServerInfo()
 	if err != nil || s == nil {
-		return err
+		return true, err
 	}
 
 	muted, err := c.Mute()
 	if err != nil {
-		return err
+		return true, err
 	}
 
 	err = c.SetMute(!muted)
-	return err
+	return !muted, err
 }
 
 // ToggleMute reverse mute status

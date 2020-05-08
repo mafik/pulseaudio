@@ -126,26 +126,16 @@ func TestExampleClient_ToggleMute(t *testing.T) {
 	c := clientForTest()
 	defer c.Close()
 
-	err := c.SetMute(true)
-	if err != nil {
-		t.Errorf("Can't mute : %v", err)
-	}
-
-	err = c.ToggleMute()
+	b1, err := c.ToggleMute()
 	if err != nil {
 		t.Errorf("Can't toggle mute : %v", err)
 	}
-	b, err := c.Mute()
-	if err != nil || b {
-		t.Errorf("Wrong value : %v", err)
-	}
-
-	err = c.ToggleMute()
+	b2, err := c.ToggleMute()
 	if err != nil {
 		t.Errorf("Can't toggle mute : %v", err)
 	}
-	b, err = c.Mute()
-	if err != nil || !b {
+
+	if b1 == b2 {
 		t.Errorf("Wrong value : %v", err)
 	}
 }
