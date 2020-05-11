@@ -39,3 +39,54 @@ func (c *Client) setSinkVolume(sinkName string, cvolume cvolume) error {
 	_, err := c.request(commandSetSinkVolume, uint32Tag, uint32(0xffffffff), stringTag, []byte(sinkName), byte(0), cvolume)
 	return err
 }
+
+// ToggleMute reverse mute status
+func (c *Client) ToggleMute() (bool, error) {
+	s, err := c.ServerInfo()
+	if err != nil || s == nil {
+		return true, err
+	}
+
+	muted, err := c.Mute()
+	if err != nil {
+		return true, err
+	}
+
+	err = c.SetMute(!muted)
+	return !muted, err
+}
+
+// ToggleMute reverse mute status
+func (c *Client) SetMute(b bool) error {
+	s, err := c.ServerInfo()
+	if err != nil || s == nil {
+		return err
+	}
+
+	muteCmd := '0'
+	if b {
+		muteCmd = '1'
+	}
+	_, err = c.request(commandSetSinkMute, uint32Tag, uint32(0xffffffff), stringTag, []byte(s.DefaultSink), byte(0), uint8(muteCmd))
+	return err
+}
+
+
+func (c *Client) Mute() (bool, error) {
+	s, err := c.ServerInfo()
+	if err != nil || s == nil {
+		return false, err
+	}
+
+	sinks, err := c.sinks()
+	if err != nil {
+		return false, err
+	}
+	for _, sink := range sinks {
+		if sink.Name != s.DefaultSink {
+			continue
+		}
+		return sink.Muted, nil
+	}
+	return true, fmt.Errorf("couldn't find sink")
+}

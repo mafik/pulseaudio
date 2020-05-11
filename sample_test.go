@@ -2,6 +2,7 @@ package pulseaudio
 
 import (
 	"fmt"
+	"testing"
 	"time"
 )
 
@@ -43,7 +44,7 @@ func Example() {
 	// Use `client` to interact with PulseAudio
 }
 
-func ExampleClient_SetVolume() {
+func TestExampleClient_SetVolume(t *testing.T) {
 	c := clientForTest()
 	defer c.Close()
 
@@ -54,14 +55,14 @@ func ExampleClient_SetVolume() {
 
 	vol, err := c.Volume()
 	if err != nil {
-		panic(err)
+		t.Errorf("%v", err)
 	}
-
-	fmt.Printf("Current volume is: %.2f", vol)
-	// Output: Current volume is: 1.50
+	if vol < 1.4999 {
+		t.Errorf("Wrong volume value : %v", vol)
+	}
 }
 
-func ExampleClient_Updates() {
+func TestExampleClient_Updates(t *testing.T) {
 	c := clientForTest()
 	defer c.Close()
 
@@ -72,7 +73,7 @@ func ExampleClient_Updates() {
 
 	select {
 	case _ = <-updates:
-		fmt.Println("Got update from PulseAudio")
+		t.Errorf("Got update from PulseAudio")
 	case _ = <-time.After(time.Millisecond * 10):
 		fmt.Println("No update in 10 ms")
 	}
@@ -87,11 +88,53 @@ func ExampleClient_Updates() {
 	case _ = <-updates:
 		fmt.Println("Got update from PulseAudio")
 	case _ = <-time.After(time.Millisecond * 10):
-		fmt.Println("No update in 10 ms")
+		t.Errorf("No update in 10 ms")
 	}
 
 	// Output:
 	// No update in 10 ms
 	// Volume set to 0.1
 	// Got update from PulseAudio
+}
+
+func TestExampleClient_SetMute(t *testing.T) {
+	c := clientForTest()
+	defer c.Close()
+
+	err := c.SetMute(true)
+	if err != nil {
+		t.Errorf("Can't mute : %v", err)
+	}
+	b, err := c.Mute()
+	if err != nil || !b {
+		t.Errorf("Can't mute : %v", err)
+	}
+
+	err = c.SetMute(false)
+	if err != nil {
+		t.Errorf("Can't unmute : %v", err)
+	}
+	b, err = c.Mute()
+	if err != nil || b {
+		t.Errorf("Wrong value : %v", err)
+	}
+
+}
+
+func TestExampleClient_ToggleMute(t *testing.T) {
+	c := clientForTest()
+	defer c.Close()
+
+	b1, err := c.ToggleMute()
+	if err != nil {
+		t.Errorf("Can't toggle mute : %v", err)
+	}
+	b2, err := c.ToggleMute()
+	if err != nil {
+		t.Errorf("Can't toggle mute : %v", err)
+	}
+
+	if b1 == b2 {
+		t.Errorf("Wrong value : %v", err)
+	}
 }
