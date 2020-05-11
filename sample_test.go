@@ -73,7 +73,6 @@ func TestExampleClient_Updates(t *testing.T) {
 
 	select {
 	case _ = <-updates:
-		//fmt.Println("Got update from PulseAudio")
 		t.Errorf("Got update from PulseAudio")
 	case _ = <-time.After(time.Millisecond * 10):
 		fmt.Println("No update in 10 ms")
