@@ -35,14 +35,6 @@ import (
 
 const version = 32
 
-func defaultAddr() string {
-	runDir, ok := os.LookupEnv("XDG_RUNTIME_DIR")
-	if !ok {
-		runDir = fmt.Sprintf("/run/user/%d", os.Getuid())
-	}
-	return fmt.Sprintf("%s/pulse/native", runDir)
-}
-
 type packetResponse struct {
 	buff *bytes.Buffer
 	err  error
@@ -73,8 +65,11 @@ type Client struct {
 // NewClient establishes a connection to the PulseAudio server.
 func NewClient(addressArr ...string) (*Client, error) {
 	if len(addressArr) < 1 {
-		addr := defaultAddr()
-		addressArr = []string{addr}
+		xdgRuntimeDir, ok := os.LookupEnv("XDG_RUNTIME_DIR")
+		if !ok {
+			xdgRuntimeDir = fmt.Sprintf("/run/user/%d", os.Getuid())
+		}
+		addressArr = []string{fmt.Sprintf("%s/pulse/native", xdgRuntimeDir)}
 	}
 
 	conn, err := net.Dial("unix", addressArr[0])
